@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fb9bd3a5f9e70284cb0951df9f6e68b2
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - eggProjectilePrefab: {fileID: 1446503098682232158, guid: 4962e570b5336864ea6bf725fc9c0ff7, type: 3}
+  - eggCollectSound: {instanceID: 0}
+  - Elytra: {instanceID: 0}
+  - Player: {fileID: 5496374027814603124, guid: 6ac58855c479ab14aabf0773e5edf1aa, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
