@@ -9,10 +9,14 @@ public class SimpleEnemyAICreeper : MonoBehaviour
     public float jumpForce = 15.0f;
     public bool isOnGround = true;
     public int hitsToDestroy = 3;
+    public AudioSource CreeperAudio;
+    public AudioClip Death;
 
     private int currentHits = 0;
     private bool canBeHit = true;
     private bool isJumping = false;
+    [SerializeField]
+    public GamePercent gamePercent;
 
     // Update is called once per frame
     void Update()
@@ -33,7 +37,7 @@ public class SimpleEnemyAICreeper : MonoBehaviour
 
     private void RotateEnemy(Vector3 direction)
     {
-        float angle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+        float angle = Mathf.Atan2(-direction.x, -direction.z) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, angle, 0f);
     }
 
@@ -47,7 +51,10 @@ public class SimpleEnemyAICreeper : MonoBehaviour
 
             if (currentHits >= hitsToDestroy)
             {
+                CreeperAudio.PlayOneShot(Death, 1.0f);
                 Destroy(gameObject);
+                gamePercent.mobsKilled++;
+                gamePercent.UpdateGamePercentage();
             }
         }
     }

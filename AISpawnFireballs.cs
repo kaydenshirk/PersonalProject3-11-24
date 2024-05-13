@@ -3,24 +3,33 @@ using System.Collections;
 
 public class ProjectileSpawner : MonoBehaviour
 {
-    public GameObject projectilePrefab; 
-    public int projectilesPerRound = 3; 
-    public float roundInterval = 10f; 
+    public GameObject projectilePrefab;
+    public Transform Blaze;
+    public int projectilesPerRound = 3;
+    public float roundInterval = 2.0f;
     public float spawnDelay = 0.2f; // Delay between each projectile spawn
+    public AudioSource blaze;
+    public AudioClip Fireball;
+    public int projectilesSpawned = 0;
+    public float timer = 0f;
+    private GameObject[] spawnedProjectiles; // Array to store spawned projectiles
 
-    private int projectilesSpawned = 0;
-    private float timer = 0f;
-    private bool spawning = false;
+    void Start()
+    {
+        blaze = GetComponent<AudioSource>();
+        spawnedProjectiles = new GameObject[projectilesPerRound]; // Initialize the array
+    }
 
     void Update()
     {
         timer += Time.deltaTime;
 
-        if (!spawning && projectilesSpawned >= projectilesPerRound && timer >= roundInterval)
+        if (projectilesSpawned >= projectilesPerRound)
         {
-            StartCooldown();
+            StartCoroutine(StartCooldown());
         }
-        else if (!spawning && timer >= roundInterval)
+
+        if (timer >= roundInterval)
         {
             StartCoroutine(SpawnProjectilesSequence());
             timer = 0f;
@@ -29,21 +38,40 @@ public class ProjectileSpawner : MonoBehaviour
 
     IEnumerator SpawnProjectilesSequence()
     {
-        spawning = true;
-        projectilesSpawned = 0;
-
         while (projectilesSpawned < projectilesPerRound)
         {
-            GameObject fireball = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+            GameObject newProjectile = Instantiate(projectilePrefab, Blaze.position, Blaze.rotation);
+
+            Transform projectileTransform = newProjectile.transform;
+
+            Rigidbody projectileRigidbody = newProjectile.GetComponent<Rigidbody>();
+            projectileRigidbody.velocity = transform.forward;
+
+            projectileTransform.parent = transform;
+
+            blaze.PlayOneShot(Fireball, 1.0f);
+            spawnedProjectiles[projectilesSpawned] = newProjectile; // Store the spawned projectile in the array
             projectilesSpawned++;
             yield return new WaitForSeconds(spawnDelay);
         }
-
-        spawning = false;
     }
 
-    void StartCooldown()
+    IEnumerator StartCooldown()
     {
+        yield return new WaitForSeconds(1);
         timer = 0f;
+        projectilesSpawned = 0;
+    }
+
+    void OnDisable()
+    {
+        // Deactivate all spawned projectiles
+        foreach (GameObject projectile in spawnedProjectiles)
+        {
+            if (projectile != null) // Check if projectile is not null (in case it was destroyed)
+            {
+                projectile.SetActive(false);
+            }
+        }
     }
 }

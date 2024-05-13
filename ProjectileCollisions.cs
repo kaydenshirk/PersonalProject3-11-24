@@ -11,12 +11,7 @@ public class TriggerDestroy : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponent<Collider>() != null && CompareTag("enemy"))
-        {
-            Destroy(gameObject);
-        }
-        
-        if(gameObject.CompareTag("ground"))
+        if(other.CompareTag("ground"))
         {
             Destroy(gameObject);
         }

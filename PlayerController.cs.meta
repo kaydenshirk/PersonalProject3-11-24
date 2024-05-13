@@ -4,9 +4,22 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
+  - playerAudio: {fileID: 822015035135619485, guid: d119f751985e61444b0bd05052f8d782, type: 3}
   - eggProjectilePrefab: {fileID: 1446503098682232158, guid: 4962e570b5336864ea6bf725fc9c0ff7, type: 3}
+  - HudEgg: {instanceID: 0}
+  - HudRocket1: {instanceID: 0}
+  - HudRocket2: {instanceID: 0}
+  - HudRocket3: {instanceID: 0}
+  - HudEggCounter: {instanceID: 0}
+  - HudRocket1Counter: {instanceID: 0}
+  - HudRocket2Counter: {instanceID: 0}
+  - HudRocket3Counter: {instanceID: 0}
+  - Rocket1Particle: {instanceID: 0}
+  - Rocket2Particle: {instanceID: 0}
+  - Rocket3Particle: {instanceID: 0}
   - eggCollectSound: {instanceID: 0}
   - Elytra: {instanceID: 0}
+  - MinecraftFirework: {instanceID: 0}
   - Player: {fileID: 5496374027814603124, guid: 6ac58855c479ab14aabf0773e5edf1aa, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}

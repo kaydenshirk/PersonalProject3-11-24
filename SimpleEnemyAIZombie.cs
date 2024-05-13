@@ -9,83 +9,82 @@ public class SimpleEnemyAI : MonoBehaviour
     public float jumpForce = 15.0f;
     public bool isOnGround = true;
     public int hitsToDestroy = 3;
-
+    public Animator ZombieAnimationController;
+    public SkinnedMeshRenderer zombieMesh;
+    public BoxCollider ZombieColIsTrigger;
+    public BoxCollider ZombieColIsNotTrigger;
+    private AudioSource zombieAudio;
+    public AudioClip jump;
+    public AudioClip Death;
+    public GameObject DeathParticles;
     private int currentHits = 0;
     private bool canBeHit = true;
-    private bool isJumping = false;
+    public bool isJumping = false;
+    [SerializeField]
+    public GamePercent gamePercent;
 
-    // Update is called once per frame
+    void Start()
+    {
+        zombieAudio = GetComponent<AudioSource>();
+    }
+
     void Update()
     {
-        if (target != null)
-        {
-            // Calculate the direction to the player
-            Vector3 direction = target.position - transform.position;
+        Vector3 direction = target.position - transform.position;
 
-            // Move towards the player smoothly
-            float step = followSpeed * Time.deltaTime;
-            transform.Translate(direction.normalized * step, Space.World);
-
-            // Rotate the enemy based on movement direction
-            RotateEnemy(direction);
-
-            // Check if the player is too high to reach and if not already jumping
-            if (IsPlayerTooHigh() && !isJumping)
-            {
-                StartCoroutine(Jump());
-            }
-        }
-    }
-
-    private void RotateEnemy(Vector3 direction)
-    {
-        // Calculate the rotation angle based on the movement direction
+        float step = followSpeed * Time.deltaTime;
+        transform.Translate(direction.normalized * step, Space.World);
         float angle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-
-        // Apply the rotation to the enemy
-        transform.rotation = Quaternion.Euler(-90f, angle, 0f);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Projectile") && canBeHit)
+        transform.rotation = Quaternion.Euler(0f, angle, 0f);
+        if (IsPlayerTooHigh())
         {
-            Destroy(other.gameObject);  // Destroy the projectile
-
-            // Increment the hit counter
-            currentHits++;
-            StartCoroutine(Cooldown());
-
-            // Check if the enemy should be destroyed
-            if (currentHits >= hitsToDestroy)
-            {
-                Destroy(gameObject);  // Destroy the enemy game object
-            }
+            StartCoroutine(Jump());
         }
     }
+
+            private void OnTriggerEnter(Collider other)
+            {
+                if (other.CompareTag("Projectile") && canBeHit)
+                {
+                    Destroy(other.gameObject);
+                    currentHits++;
+                    StartCoroutine(Cooldown());
+
+                    if (currentHits >= hitsToDestroy)
+                    {   
+                    gamePercent.mobsKilled++;
+                    gamePercent.UpdateGamePercentage();
+                    ZombieColIsTrigger.enabled = false;
+                    ZombieAnimationController.SetInteger("Health", 0);
+                    followSpeed = 0f;
+                    zombieAudio.PlayOneShot(Death, 1.0f);
+                    StartCoroutine(WaitForDeathCoroutine());
+                    }
+                }
+            }
 
     private IEnumerator Cooldown()
     {
         canBeHit = false;
-        yield return new WaitForSeconds(0.1f);  // Adjust the cooldown duration as needed
+        yield return new WaitForSeconds(0.1f);
         canBeHit = true;
     }
 
     private bool IsPlayerTooHigh()
     {
-        // Check if the player is higher than a certain threshold
         return target.position.y - transform.position.y > 1.5f;
     }
 
     private IEnumerator Jump()
     {
         if (isOnGround)
-        { isOnGround = false;
-         GetComponent<Rigidbody>().AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-         yield return null;
+        {
+            isOnGround = false;
+            GetComponent<Rigidbody>().AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            yield return new WaitForSeconds(0.1f);
+            zombieAudio.PlayOneShot(jump, 1.0f);
         }
     }
-
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -94,4 +93,20 @@ public class SimpleEnemyAI : MonoBehaviour
             isOnGround = true;
         }
     }
+
+        private IEnumerator WaitForDeathCoroutine()
+        {
+          // Wait for a short duration to allow the animation to start
+          yield return new WaitForSeconds(0.5f);
+             while (ZombieAnimationController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1)
+         {
+             yield return null;
+         }
+         ZombieColIsNotTrigger.enabled = false;
+         ZombieAnimationController.SetInteger("Health", 1);
+         zombieMesh.enabled = false;
+         DeathParticles.SetActive(true);
+         yield return new WaitForSeconds(1.0f);
+         Destroy(gameObject);
+        }
 }

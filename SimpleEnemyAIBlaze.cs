@@ -7,9 +7,18 @@ public class SimpleEnemyAIBlaze : MonoBehaviour
     public Transform target;
     public float followSpeed = 5f;
     public int hitsToDestroy = 6;
-
+    public Animator BlazeAnimationController;
+    public BoxCollider BlazeColIsTrigger;
+    public BoxCollider BlazeColIsNotTrigger;
+    public GameObject DeathParticles;
+    public SkinnedMeshRenderer BlazeMesh;
+    public AudioSource BlazeAudio;
+    public AudioClip hitSound;
+    public AudioClip DeathSound;
     private int currentHits = -4;
     private bool canBeHit = true;
+    [SerializeField]
+    public GamePercent gamePercent;
 
     // Update is called once per frame
     void Update()
@@ -42,15 +51,43 @@ public class SimpleEnemyAIBlaze : MonoBehaviour
         if (other.CompareTag("Projectile") && canBeHit)
         {
             Destroy(other.gameObject);  // Destroy the projectile
-
-            // Increment the hit counter
             currentHits++;
+            BlazeAudio.PlayOneShot(hitSound, 1.0f);
 
             // Check if the enemy should be destroyed
             if (currentHits >= hitsToDestroy)
             {
-                Destroy(gameObject);  // Destroy the enemy game object
+                gamePercent.mobsKilled++;
+                gamePercent.UpdateGamePercentage();
+                BlazeAnimationController.SetInteger("Health", 0);
+                BlazeColIsTrigger.enabled = false;
+                BlazeColIsNotTrigger.enabled = false;
+                BlazeAudio.PlayOneShot(DeathSound, 1.0f);
+                StartCoroutine(WaitForDeathCoroutine());
             }
         }
     }
+            private IEnumerator WaitForDeathCoroutine()
+             {
+          yield return new WaitForSeconds(1.0f);
+          while (BlazeAnimationController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1)
+         {
+             yield return null;
+         }
+         BlazeAnimationController.SetInteger("Health", 0);
+         if (BlazeMesh != null)
+            {
+                BlazeMesh.enabled = false;
+            }
+        if (DeathParticles != null)
+            {
+                DeathParticles.SetActive(true);
+            }
+
+        yield return new WaitForSeconds(1.0f);
+        if (gameObject != null)
+            {
+                Destroy(gameObject);
+            }
+            }
 }

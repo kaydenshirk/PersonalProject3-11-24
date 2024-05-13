@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class ProjectileCollisionsBlaze : MonoBehaviour
 {
+
+    void Start()
+    {
+        StartCoroutine(Cooldown());
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<Collider>() != null && CompareTag("enemy"))
@@ -11,9 +16,16 @@ public class ProjectileCollisionsBlaze : MonoBehaviour
             Destroy(gameObject);
         }
         
-        if(gameObject.CompareTag("ground"))
+        if(other.CompareTag("ground"))
         {
             Destroy(gameObject);
         }
+    }
+
+    
+    private IEnumerator Cooldown()
+    {
+        yield return new WaitForSeconds(5.0f);
+        Destroy(gameObject);
     }
 }
